@@ -92,6 +92,18 @@ public class WWidget : MonoBehaviour
         ), GUIContent.none, borderStyle);
     }
 
+    public static Rect GetPaddedRect(Rect rect, float padding, float borderWidth = 0)
+    {
+        var paddedRect = new Rect(rect);
+
+        paddedRect.xMin += padding + borderWidth;
+        paddedRect.yMin += padding + borderWidth;
+        paddedRect.xMax -= padding + borderWidth;
+        paddedRect.yMax -= padding + borderWidth;
+
+        return paddedRect;
+    }
+
     protected Rect GetRect()
     {
         var rect = new Rect(

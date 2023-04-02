@@ -179,10 +179,18 @@ public class WDialogParser
     }
 }
 
+[System.Serializable]
+public record WDialogCharacterVisual
+{
+    public string name;
+    public Texture2D sprite;
+}
+
 public class WDialog : WWidget
 {
     public TextAsset asset;
     public WDialogStyle style;
+    public List<WDialogCharacterVisual> characters;
 
     public UnityEvent onShow;
     public UnityEvent onLabelReached;
@@ -374,6 +382,26 @@ public class WDialog : WWidget
         return height;
     }
 
+    private WDialogCharacterVisual FindCharacterSprite(string name)
+    {
+        var screen = GetCurrentScreen();
+
+        if (screen == null)
+        {
+            return null;
+        }
+
+        foreach (var character in characters)
+        {
+            if (character.name == name)
+            {
+                return character;
+            }
+        }
+
+        return null;
+    }
+
     protected override void OnUpdate(Rect rect)
     {
         base.OnUpdate(rect);
@@ -399,6 +427,16 @@ public class WDialog : WWidget
         var characterRect = new Rect(rect.x, rect.y, rect.height, rect.height);
         RenderBox(characterRect, borderStyle, style.borderWidth);
 
+        characterRect = GetPaddedRect(characterRect, style.padding, style.borderWidth);
+
+        var characterSprite = FindCharacterSprite(screen.character.name);
+
+        if (characterSprite != null)
+        {
+            characterSprite.sprite.filterMode = FilterMode.Point;
+            GUI.DrawTexture(characterRect, characterSprite.sprite, ScaleMode.ScaleToFit);
+        }
+
         var textRect = new Rect(
             rect.x + rect.height - style.borderWidth,
             rect.y,
@@ -408,10 +446,7 @@ public class WDialog : WWidget
 
         RenderBox(textRect, borderStyle, style.borderWidth);
 
-        textRect.xMin += style.padding + style.borderWidth;
-        textRect.yMin += style.padding + style.borderWidth;
-        textRect.xMax -= style.padding + style.borderWidth;
-        textRect.yMax -= style.padding + style.borderWidth;
+        textRect = GetPaddedRect(textRect, style.padding, style.borderWidth);
 
         textStyle.fixedWidth = textRect.width;
 

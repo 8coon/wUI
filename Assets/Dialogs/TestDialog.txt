@@ -7,15 +7,13 @@ Kai> Hello! I'm
 [end]: not looking for anything right now
 
 sleep:
-Shopkeeper> There's an hotel right next to my place.
-I'm sure they will be eager to help.
+Shopkeeper> There's an hotel right next to my place. I'm sure they will be eager to help.
 
 Kai> Thanks!
 end.
 
 buy_food:
-Shopkeeper> That's good - I think I might have what
-you're looking for.
+Shopkeeper> That's good - I think I might have what you're looking for.
 
 Shopkeeper> Follow me!
 end.
