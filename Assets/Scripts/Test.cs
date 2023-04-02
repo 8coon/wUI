@@ -4,13 +4,29 @@ using UnityEngine;
 
 public class Test : MonoBehaviour
 {
+    public void OnShow()
+    {
+        Debug.Log("Dialog was showed!");
+    }
+
+    public void OnLabelReached()
+    {
+        var dialog = GetComponent<WDialog>();
+        Debug.Log(dialog.GetCurrentLabel() + " was reached!");
+    }
+
+    public void OnHide()
+    {
+        Debug.Log("Dialog was hidden!");
+    }
+
     void Update()
     {
-        if (Input.GetKeyUp("space"))
-        {
-            var dialog = GetComponent<WDialog>();
+        var dialog = GetComponent<WDialog>();
 
-            if (dialog && !dialog.IsVisible())
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            if (!dialog.IsVisible())
             {
                 dialog.Show();
             }
