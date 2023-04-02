@@ -323,11 +323,10 @@ public class WDialog : WWidget
         }
     }
 
-    private bool TrySkip()
+    private void Skip()
     {
         if (
-            Time.realtimeSinceStartup >= lastSkipTs + .2f &&
-            (Input.GetKeyUp("enter") || Input.GetKeyUp("space"))
+            Time.realtimeSinceStartup >= lastSkipTs + .2f
         )
         {
             lastSkipTs = Time.realtimeSinceStartup;
@@ -342,7 +341,7 @@ public class WDialog : WWidget
 
                 if (screen == null)
                 {
-                    return false;
+                    return;
                 }
 
                 if (screen.options.Count == 0)
@@ -354,17 +353,17 @@ public class WDialog : WWidget
                     if (screen.options[currentOption].label == "end")
                     {
                         Hide();
-                        return false;
+                        return;
                     }
 
                     GotoScreen(FindScreenIndex(screen.options[currentOption].label));
                 }
             }
 
-            return true;
+            return;
         }
 
-        return false;
+        return;
     }
 
     private float RenderOption(WDialogOption option, Rect rect, float offset, int index)
@@ -451,7 +450,6 @@ public class WDialog : WWidget
         textStyle.fixedWidth = textRect.width;
 
         if (
-            !TrySkip() &&
             currentText.Length < targetText.Length &&
             Time.realtimeSinceStartup >= lastCharTs + charTimeout
         )
@@ -491,7 +489,7 @@ public class WDialog : WWidget
             return;
         }
 
-        if (Input.GetKeyDown("down"))
+        if (Input.GetKeyUp("down"))
         {
             currentOption++;
             if (currentOption >= screen.options.Count)
@@ -500,7 +498,7 @@ public class WDialog : WWidget
             }
         }
 
-        if (Input.GetKeyDown("up"))
+        if (Input.GetKeyUp("up"))
         {
             currentOption--;
             if (currentOption < 0)
@@ -511,6 +509,11 @@ public class WDialog : WWidget
                     currentOption = 0;
                 }
             }
+        }
+
+        if (Input.GetKeyUp("space") || Input.GetKeyUp("enter"))
+        {
+            Skip();
         }
     }
 }
