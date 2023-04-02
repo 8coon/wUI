@@ -1,0 +1,21 @@
+Shopkeeper>
+Hello there! How can I help you?
+
+Kai> Hello! I'm
+[sleep]: looking for a place to sleep
+[buy_food]: looking for some food to buy
+[end]: not looking for anything right now
+
+sleep:
+Shopkeeper> There's an hotel right next to my place.
+I'm sure they will be eager to help.
+
+Kai> Thanks!
+end.
+
+buy_food:
+Shopkeeper> That's good - I think I might have what
+you're looking for.
+
+Shopkeeper> Follow me!
+end.
