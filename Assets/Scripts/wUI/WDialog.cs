@@ -37,8 +37,10 @@ public record WDialogStyle
 
     public float borderWidth = 2;
     public float padding = 8;
+    public float optionPadding = 8;
 
     public Color backColor = new Color(0.2f, 0.2f, 0.2f, 0.64f);
+    public Color optionColor = new Color(0.4f, 0.4f, 0.4f, 0.64f);
     public Color borderColor = Color.black;
     public Color textColor = Color.white;
 }
@@ -106,8 +108,8 @@ public class WDialogParser
             var dotsIndex = line.IndexOf(':');
             var option = new WDialogOption();
 
-            option.label = line.Substring(1, dotsIndex - 1);
-            option.text = line.Substring(dotsIndex + 1).Trim();
+            option.label = line.Substring(1, dotsIndex - 2);
+            option.text = " " + line.Substring(dotsIndex + 1).Trim();
 
             screen.options.Add(option);
 
@@ -188,6 +190,7 @@ public class WDialog : WWidget
 
     private WColorStyle backColorStyle = new WColorStyle();
     private WColorStyle borderColorStyle = new WColorStyle();
+    private WColorStyle optionColorStyle = new WColorStyle();
     private GUIStyle textStyle = new GUIStyle();
 
     private WDialogParser parser = new WDialogParser();
@@ -198,6 +201,7 @@ public class WDialog : WWidget
     private float lastSkipTs = 0;
     private string currentText = "";
     private string targetText = "";
+    private int currentOption = 0;
 
     public WDialogScreen GetCurrentScreen()
     {
@@ -279,6 +283,7 @@ public class WDialog : WWidget
         {
             currentText = "";
             targetText = screen.GetText();
+            currentOption = 0;
         }
 
         Debug.Log("[WDialog] Goto screen " + currentScreen);
@@ -325,13 +330,48 @@ public class WDialog : WWidget
             }
             else
             {
-                GotoScreen(currentScreen + 1);
+                var screen = GetCurrentScreen();
+
+                if (screen == null)
+                {
+                    return false;
+                }
+
+                if (screen.options.Count == 0)
+                {
+                    GotoScreen(currentScreen + 1);
+                }
+                else
+                {
+                    if (screen.options[currentOption].label == "end")
+                    {
+                        Hide();
+                        return false;
+                    }
+
+                    GotoScreen(FindScreenIndex(screen.options[currentOption].label));
+                }
             }
 
             return true;
         }
 
         return false;
+    }
+
+    private float RenderOption(WDialogOption option, Rect rect, float offset, int index)
+    {
+        var height = textStyle.CalcHeight(new GUIContent(option.text), Screen.width);
+
+        if (index == currentOption)
+        {
+            var optionStyle = optionColorStyle.GetGUIStyle(style.optionColor);
+            GUI.Box(new Rect(rect.x, rect.y + offset, rect.width, height), GUIContent.none, optionStyle);
+        }
+
+        GUI.Label(new Rect(rect.x, rect.y + offset, rect.width, rect.height), option.text, textStyle);
+
+        return height;
     }
 
     protected override void OnUpdate(Rect rect)
@@ -386,10 +426,56 @@ public class WDialog : WWidget
         }
 
         var textContent = new GUIContent(currentText);
-        //var textSize = guiStyle.CalcHeight(textContent, size.width);
 
-        //Debug.Log(textSize);
+        // Rendering options
+        if (screen.options.Count > 0 && currentText.Length == targetText.Length)
+        {
+            var offset = textStyle.CalcHeight(textContent, textStyle.fixedWidth) + style.optionPadding;
+
+            textStyle.wordWrap = false;
+            textStyle.fixedWidth = 0;
+            textStyle.fixedHeight = 0;
+            int i = 0;
+
+            foreach (var option in screen.options)
+            {
+                offset += RenderOption(option, textRect, offset, i);
+                i++;
+            }
+        }
 
         GUI.Label(textRect, textContent, textStyle);
+    }
+
+    void Update()
+    {
+        var screen = GetCurrentScreen();
+
+        if (screen == null)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown("down"))
+        {
+            currentOption++;
+            if (currentOption >= screen.options.Count)
+            {
+                currentOption = 0;
+            }
+        }
+
+        if (Input.GetKeyDown("up"))
+        {
+            currentOption--;
+            if (currentOption < 0)
+            {
+                currentOption = screen.options.Count - 1;
+                if (currentOption < 0)
+                {
+                    currentOption = 0;
+                }
+            }
+        }
     }
 }
